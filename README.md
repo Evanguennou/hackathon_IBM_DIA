@@ -1,5 +1,5 @@
 # Welcome to the IBM Hackathon! 🎉
-Val
+
 This repository serves as a template to help you get started quickly.  
 Follow the project structure, fork the repo, and clone it locally to begin.
 
