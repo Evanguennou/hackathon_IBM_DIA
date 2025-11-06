@@ -1,5 +1,6 @@
 from sentence_transformers import SentenceTransformer
 from chromadb.utils import embedding_functions
+import pandas as pd
 
 # Exemple : modèle multilingue E5
 embedder = embedding_functions.SentenceTransformerEmbeddingFunction(
@@ -11,14 +12,14 @@ from chromadb.config import Settings
 
 class db():
     def __init__(self):
-        self.client = Client(Settings(persist_directory="./chroma_db"))
+        self.client = Client(Settings(persist_directory="C:\\Users\\ihadi\\Desktop\\Semestre 9\\BI Pipeline\\hackathon_IBM_DIA\\chroma_db"))
         self.collection = self.client.get_or_create_collection(name="my_multilingual_rag", embedding_function=embedder)
 
-    def add_document(self, document, doc_id):
+    def add_document(self, document):
         self.collection.add(
             documents=[document],
             metadatas=[{"source": "faq"}],
-            ids=[doc_id]
+            ids=["doc_fr_en"]
         )
 
     def query(self, query_text):
@@ -31,12 +32,22 @@ class db():
         )
         return results
 
-db_instance = db()
+    def csv_to_chroma(self, csv='data_pretraitee.csv'):
+        df = pd.read_csv(csv)
+        for index, row in df.iterrows():
+            question = row['Title']
+            answer = row['Content']
+            self.collection.add(documents=[f'''Q: {question}, A: {answer}'''],
+                                metadatas=[{"Post Type": row['Post Type'], 
+                                            "Langues": row['Langues'], 
+                                            "Thématiques": row['Thématiques'], 
+                                            "Utilisateurs": row['Utilisateurs'], 
+                                            "Écoles": row['Écoles']}],
+                                ids=["doc_fr_en"])
+            print(f"Added document {index+1}/{len(df)} to ChromaDB")
 
-db_instance.add_document("""Q": "Quel est le titre de document 1?", 
-                          "A": "j'aime les fleures""",'doc1')
-db_instance.add_document("""Q": "Quel est le titre de document 2?", 
-                          "A": "j'aime les tulipes""",'doc2')
-
-result = db_instance.similarity_search("titre du Doc1", n_results=1)
+# Exemple d'utilisation
+db_chroma = db()
+db_chroma.csv_to_chroma()
+result = db_chroma.similarity_search("Comment Changer de mot de passe ?", n_results=1)
 print(result)
