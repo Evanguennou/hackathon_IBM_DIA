@@ -1,12 +1,12 @@
 from flask import Flask, render_template, request, jsonify
-
+from llm import generate_response
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
 history = []  # Liste des messages { "question": ..., "answer": ... }
 
 def generate_answer(question):
     # Ici tu peux mettre ton code de génération de réponse
-    return f"Réponse auto-générée pour : «{question}»"
+    return generate_response(question)
 
 @app.route('/', methods=['GET'])
 def ask():

@@ -17,7 +17,7 @@ class db:
         self.collection = self.client.get_or_create_collection(
             name="my_multilingual_rag",
             embedding_function=embedder
-        )
+        ) 
 
     def add_document(self, document, doc_id):
         self.collection.add(
@@ -53,4 +53,6 @@ class db:
 def search_similar_documents(db_chroma):
     result = db_chroma.similarity_search("Comment puis-je postuler pour un programme d'échange universitaire ?", n_results=3)
     return result
-    
+
+db_chroma = db()
+db_chroma.csv_to_chroma()
