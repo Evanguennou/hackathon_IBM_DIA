@@ -50,12 +50,7 @@ class db:
 
             print(f"✅ Added document {index+1}/{len(df)} to ChromaDB")
 
-# Utilisation
-db_chroma = db()
-db_chroma.csv_to_chroma()
-
-result = db_chroma.similarity_search("Comment puis-je postuler pour un programme d'échange universitaire ?", n_results=3)
-
-print("Résultats de la recherche par similarité :")
-for doc in result['documents']:
-    print(f"- {doc}")
+def search_similar_documents(db_chroma):
+    result = db_chroma.similarity_search("Comment puis-je postuler pour un programme d'échange universitaire ?", n_results=3)
+    return result
+    
