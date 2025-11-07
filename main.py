@@ -1,12 +1,24 @@
 from flask import Flask, render_template, request, jsonify
 from llm import generate_response
+from langchain.prompts import PromptTemplate
+
+template = """Réponds toujours en français, même si la question est en anglais.
+Utilise les informations suivantes pour répondre à la question. 
+Si tu ne sais pas, dis que tu ne sais pas.
+
+Contexte : {context}
+Question : {question}
+Réponse en français :"""
+
+prompt = PromptTemplate(input_variables=["context", "question"], template=template)
+
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
 history = []  # Liste des messages { "question": ..., "answer": ... }
 
 def generate_answer(question):
     # Ici tu peux mettre ton code de génération de réponse
-    return generate_response(question)
+    return str(generate_response(question))
 
 @app.route('/', methods=['GET'])
 def ask():

@@ -1,58 +1,42 @@
-from sentence_transformers import SentenceTransformer
-from chromadb.utils import embedding_functions
 import pandas as pd
-from chromadb import Client
+import chromadb
 from chromadb.config import Settings
+from langchain_community.embeddings import HuggingFaceEmbeddings
+import numpy as np
 
-# Modèle multilingue
-embedder = embedding_functions.SentenceTransformerEmbeddingFunction(
-    model_name="intfloat/multilingual-e5-base"
-)
+# # 1️⃣ Charger ton CSV
+# df = pd.read_csv("data_pretraitee.csv")  # colonnes "Title" et "Content"
 
-class db:
-    def __init__(self):
-        self.client = Client(Settings(
-            persist_directory="C:\\Users\\ihadi\\Desktop\\Semestre 9\\BI Pipeline\\hackathon_IBM_DIA\\chroma_db"
-        ))
-        self.collection = self.client.get_or_create_collection(
-            name="my_multilingual_rag",
-            embedding_function=embedder
-        ) 
+# # 2️⃣ Créer l'instance d'embeddings
+# embedding_model = HuggingFaceEmbeddings(model_name="intfloat/multilingual-e5-base")
 
-    def add_document(self, document, doc_id):
-        self.collection.add(
-            documents=[document],
-            metadatas=[{"source": "faq"}],
-            ids=[doc_id]
-        )
+# # 3️⃣ Préparer les textes et IDs
+# texts = [f'Q: {row["Title"]} A: {row["Content"]}' for _, row in df.iterrows()]
+# ids = [str(i) for i in range(len(texts))]
 
-    def similarity_search(self, query_text, n_results=1):
-        return self.collection.query(query_texts=[query_text], n_results=n_results)
+# # 4️⃣ Calculer les embeddings en batch
+# # HuggingFaceEmbeddings retourne une liste de listes, compatible avec Chroma
+# embeddings = embedding_model.embed_documents(texts)
 
-    def csv_to_chroma(self, csv='data_pretraitee.csv'):
-        df = pd.read_csv(csv)
-        for index, row in df.iterrows():
-            question = row['Title']
-            answer = row['Content']
-            doc = f"Q: {question}, A: {answer}"
+# 5️⃣ Connexion à Chroma Server (Docker)
+client = chromadb.HttpClient(host="localhost", port=8000)
 
-            self.collection.add(
-                documents=[doc],
-                metadatas=[{
-                    "Post Type": row['Post Type'],
-                    "Langues": row['Langues'],
-                    "Thématiques": row['Thématiques'],
-                    "Utilisateurs": row['Utilisateurs'],
-                    "Écoles": row['Écoles']
-                }],
-                ids=[f"doc_{index}"]
-            )
+# 6️⃣ Créer ou récupérer la collection
+collection_name = "ma_collection"
+try:
+    # Essaie de créer la collection
+    collection = client.create_collection(name=collection_name)
+except Exception as e:
+    # Si elle existe déjà, récupère-la
+    collection = client.get_collection(name=collection_name)
 
-            print(f"✅ Added document {index+1}/{len(df)} to ChromaDB")
+# 7️⃣ Ajouter les documents avec les embeddings
+# collection.add(
+#     ids=ids,
+#     documents=texts,
+#     embeddings=embeddings
+# )
 
-def search_similar_documents(db_chroma):
-    result = db_chroma.similarity_search("Comment puis-je postuler pour un programme d'échange universitaire ?", n_results=3)
-    return result
+# 8️⃣ Vérifier le nombre de documents
+print("Nombre de documents dans Chroma :", collection.count())
 
-db_chroma = db()
-db_chroma.csv_to_chroma()
