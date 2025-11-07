@@ -4,7 +4,7 @@ import csv
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
 history = []  # Liste des messages { "question": ..., "answer": ... }
-
+#
 def generate_answer(question):
     return query(question)
 
