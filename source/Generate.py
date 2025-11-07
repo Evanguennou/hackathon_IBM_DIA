@@ -33,8 +33,8 @@ model = ModelInference(
 
 def query(question):
 
-    # Chemin vers ton fichier CSV
-    csv_file = "/Users/tiago/hackathon_IBM_DIA/data_pretraitee.csv"
+    # path csv file
+    csv_file = "/Users/tiago/Documents/esilvA5/ecole/IBM/dernier/hackathon_IBM_DIA/dataset/data_pretraitee.csv"
 
     prompt_input = ""
 
@@ -43,7 +43,7 @@ def query(question):
         for row in reader:
             title = row['Title'].strip()
             content = row['Content'].strip()
-            # Ajouter à prompt_input
+            # add to prompt_input
             prompt_input += f"Entrée : {title}\nSortie : {content}\n\n"
 
 
@@ -52,6 +52,5 @@ def query(question):
 
     generated_response = model.generate_text(prompt=prompt_input, guardrails=False)
     cleaned_response = generated_response.split('\nEntrée')[0].replace("\n",' ')
-    print("generated_response:", generated_response)
-    cleaned_response= cleaned_response if ("Entrée : " not in cleaned_response and "Sortie : " not in cleaned_response)  else "Désolé, je n'ai pas la réponse.\n Veuillez contacter : scolarite-esilv@devinci.fr "
+    cleaned_response= cleaned_response if ("Entrée : " not in cleaned_response and "Sortie : " not in cleaned_response)  else "Sorry, I don't have the answer.\n Please contact: scolarite-esilv@devinci.fr"
     return cleaned_response

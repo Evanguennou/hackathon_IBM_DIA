@@ -3,7 +3,7 @@ from Generate import query
 import csv
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
-history = []  # Liste des messages { "question": ..., "answer": ... }
+history = []  # history of questions and answers
 #
 def generate_answer(question):
     return query(question)
@@ -31,26 +31,26 @@ def satisfied():
     answer = data.get("answer", "").strip()
 
     if question and answer:
-        csv_file = "/Users/tiago/hackathon_IBM_DIA/data_pretraitee.csv"
+        csv_file = "/Users/tiago/Documents/esilvA5/ecole/IBM/dernier/hackathon_IBM_DIA/dataset/data_pretraitee.csv"
 
-        # Lecture du dernier id pour l'incrémentation
+        # Read the last id
         try:
             with open(csv_file, 'r', encoding='utf-8') as f:
                 reader = csv.DictReader(f)
                 rows = list(reader)
                 last_id = int(rows[-1]['id']) if rows else 0
         except FileNotFoundError:
-            # Si le fichier n'existe pas encore
+            # If the file does not exist yet
             last_id = 0
 
         new_id = last_id + 1
 
-        # Écriture de la nouvelle ligne
+        # Writing the new row
         with open(csv_file, 'a', newline='', encoding='utf-8') as f:
             fieldnames = ['id', 'Title', 'Content']
             writer = csv.DictWriter(f, fieldnames=fieldnames)
 
-            # Si le fichier est vide, on ajoute l'en-tête
+            # if empty, write header
             if f.tell() == 0:
                 writer.writeheader()
 
